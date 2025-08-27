@@ -1,0 +1,56 @@
+package org.apache.ibatis.ognl;
+
+import org.apache.ibatis.ognl.enhance.UnsupportedCompilationException;
+
+/* loaded from: mybatis-3.4.6.jar:org/apache/ibatis/ognl/ASTIn.class */
+class ASTIn extends SimpleNode implements NodeType {
+    public ASTIn(int id) {
+        super(id);
+    }
+
+    public ASTIn(OgnlParser p, int id) {
+        super(p, id);
+    }
+
+    @Override // org.apache.ibatis.ognl.SimpleNode
+    protected Object getValueBody(OgnlContext context, Object source) throws OgnlException {
+        Object v1 = this._children[0].getValue(context, source);
+        Object v2 = this._children[1].getValue(context, source);
+        return OgnlOps.in(v1, v2) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    @Override // org.apache.ibatis.ognl.SimpleNode
+    public String toString() {
+        return this._children[0] + " in " + this._children[1];
+    }
+
+    @Override // org.apache.ibatis.ognl.NodeType
+    public Class getGetterClass() {
+        return Boolean.TYPE;
+    }
+
+    @Override // org.apache.ibatis.ognl.NodeType
+    public Class getSetterClass() {
+        return null;
+    }
+
+    @Override // org.apache.ibatis.ognl.SimpleNode, org.apache.ibatis.ognl.JavaSource
+    public String toGetSourceString(OgnlContext context, Object target) {
+        try {
+            String result = "org.apache.ibatis.ognl.OgnlOps.in( ($w) " + OgnlRuntime.getChildSource(context, target, this._children[0]) + ", ($w) " + OgnlRuntime.getChildSource(context, target, this._children[1]);
+            String result2 = result + ")";
+            context.setCurrentType(Boolean.TYPE);
+            return result2;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            throw new UnsupportedCompilationException("evaluation resulted in null expression.");
+        } catch (Throwable t) {
+            throw OgnlOps.castToRuntime(t);
+        }
+    }
+
+    @Override // org.apache.ibatis.ognl.SimpleNode, org.apache.ibatis.ognl.JavaSource
+    public String toSetSourceString(OgnlContext context, Object target) {
+        throw new UnsupportedCompilationException("Map expressions not supported as native java yet.");
+    }
+}

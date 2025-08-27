@@ -1,0 +1,78 @@
+package org.mybatis.spring.transaction;
+
+import com.moredian.onpremise.core.common.constants.SymbolConstants;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.transaction.Transaction;
+import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
+
+/* loaded from: mybatis-spring-1.3.2.jar:org/mybatis/spring/transaction/SpringManagedTransaction.class */
+public class SpringManagedTransaction implements Transaction {
+    private static final Log LOGGER = LogFactory.getLog((Class<?>) SpringManagedTransaction.class);
+    private final DataSource dataSource;
+    private Connection connection;
+    private boolean isConnectionTransactional;
+    private boolean autoCommit;
+
+    public SpringManagedTransaction(DataSource dataSource) {
+        Assert.notNull(dataSource, "No DataSource specified");
+        this.dataSource = dataSource;
+    }
+
+    @Override // org.apache.ibatis.transaction.Transaction
+    public Connection getConnection() throws SQLException {
+        if (this.connection == null) {
+            openConnection();
+        }
+        return this.connection;
+    }
+
+    private void openConnection() throws SQLException {
+        this.connection = DataSourceUtils.getConnection(this.dataSource);
+        this.autoCommit = this.connection.getAutoCommit();
+        this.isConnectionTransactional = DataSourceUtils.isConnectionTransactional(this.connection, this.dataSource);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("JDBC Connection [" + this.connection + "] will" + (this.isConnectionTransactional ? SymbolConstants.SPACE_SYMBOL : " not ") + "be managed by Spring");
+        }
+    }
+
+    @Override // org.apache.ibatis.transaction.Transaction
+    public void commit() throws SQLException {
+        if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Committing JDBC Connection [" + this.connection + "]");
+            }
+            this.connection.commit();
+        }
+    }
+
+    @Override // org.apache.ibatis.transaction.Transaction
+    public void rollback() throws SQLException {
+        if (this.connection != null && !this.isConnectionTransactional && !this.autoCommit) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Rolling back JDBC Connection [" + this.connection + "]");
+            }
+            this.connection.rollback();
+        }
+    }
+
+    @Override // org.apache.ibatis.transaction.Transaction
+    public void close() throws SQLException {
+        DataSourceUtils.releaseConnection(this.connection, this.dataSource);
+    }
+
+    @Override // org.apache.ibatis.transaction.Transaction
+    public Integer getTimeout() throws SQLException {
+        ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(this.dataSource);
+        if (holder != null && holder.hasTimeout()) {
+            return Integer.valueOf(holder.getTimeToLiveInSeconds());
+        }
+        return null;
+    }
+}

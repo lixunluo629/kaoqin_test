@@ -1,0 +1,21 @@
+package org.hyperic.sigar.win32;
+
+import org.hyperic.sigar.SigarException;
+
+/* loaded from: sigar-1.6.4.jar:org/hyperic/sigar/win32/Win32Exception.class */
+public class Win32Exception extends SigarException {
+    private int errorCode;
+
+    public Win32Exception(String s) {
+        super(s);
+    }
+
+    public Win32Exception(int error, String s) {
+        super(s);
+        this.errorCode = error;
+    }
+
+    public int getErrorCode() {
+        return this.errorCode;
+    }
+}

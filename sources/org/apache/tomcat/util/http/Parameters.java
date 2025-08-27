@@ -1,0 +1,261 @@
+package org.apache.tomcat.util.http;
+
+import com.moredian.onpremise.core.common.constants.SymbolConstants;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.buf.B2CConverter;
+import org.apache.tomcat.util.buf.ByteChunk;
+import org.apache.tomcat.util.buf.MessageBytes;
+import org.apache.tomcat.util.buf.StringUtils;
+import org.apache.tomcat.util.buf.UDecoder;
+import org.apache.tomcat.util.log.UserDataHelper;
+import org.apache.tomcat.util.res.StringManager;
+
+/* loaded from: tomcat-embed-core-8.5.43.jar:org/apache/tomcat/util/http/Parameters.class */
+public final class Parameters {
+    private MessageBytes queryMB;
+    private UDecoder urlDec;
+
+    @Deprecated
+    public static final String DEFAULT_ENCODING = "ISO-8859-1";
+    private static final Log log = LogFactory.getLog((Class<?>) Parameters.class);
+    private static final UserDataHelper userDataLog = new UserDataHelper(log);
+    private static final UserDataHelper maxParamCountLog = new UserDataHelper(log);
+    private static final StringManager sm = StringManager.getManager("org.apache.tomcat.util.http");
+    private static final Charset DEFAULT_BODY_CHARSET = StandardCharsets.ISO_8859_1;
+    private static final Charset DEFAULT_URI_CHARSET = StandardCharsets.UTF_8;
+    private final Map<String, ArrayList<String>> paramHashValues = new LinkedHashMap();
+    private boolean didQueryParameters = false;
+    private final MessageBytes decodedQuery = MessageBytes.newInstance();
+    private Charset charset = StandardCharsets.ISO_8859_1;
+    private Charset queryStringCharset = StandardCharsets.UTF_8;
+    private int limit = -1;
+    private int parameterCount = 0;
+    private FailReason parseFailedReason = null;
+    private final ByteChunk tmpName = new ByteChunk();
+    private final ByteChunk tmpValue = new ByteChunk();
+    private final ByteChunk origName = new ByteChunk();
+    private final ByteChunk origValue = new ByteChunk();
+
+    /* loaded from: tomcat-embed-core-8.5.43.jar:org/apache/tomcat/util/http/Parameters$FailReason.class */
+    public enum FailReason {
+        CLIENT_DISCONNECT,
+        MULTIPART_CONFIG_INVALID,
+        INVALID_CONTENT_TYPE,
+        IO_ERROR,
+        NO_NAME,
+        POST_TOO_LARGE,
+        REQUEST_BODY_INCOMPLETE,
+        TOO_MANY_PARAMETERS,
+        UNKNOWN,
+        URL_DECODING
+    }
+
+    public void setQuery(MessageBytes queryMB) {
+        this.queryMB = queryMB;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    @Deprecated
+    public String getEncoding() {
+        return this.charset.name();
+    }
+
+    public Charset getCharset() {
+        return this.charset;
+    }
+
+    @Deprecated
+    public void setEncoding(String s) {
+        setCharset(getCharset(s, DEFAULT_BODY_CHARSET));
+    }
+
+    public void setCharset(Charset charset) {
+        if (charset == null) {
+            charset = DEFAULT_BODY_CHARSET;
+        }
+        this.charset = charset;
+        if (log.isDebugEnabled()) {
+            log.debug("Set encoding to " + charset.name());
+        }
+    }
+
+    @Deprecated
+    public void setQueryStringEncoding(String s) {
+        setQueryStringCharset(getCharset(s, DEFAULT_URI_CHARSET));
+    }
+
+    public void setQueryStringCharset(Charset queryStringCharset) {
+        if (queryStringCharset == null) {
+            queryStringCharset = DEFAULT_URI_CHARSET;
+        }
+        this.queryStringCharset = queryStringCharset;
+        if (log.isDebugEnabled()) {
+            log.debug("Set query string encoding to " + queryStringCharset.name());
+        }
+    }
+
+    public boolean isParseFailed() {
+        return this.parseFailedReason != null;
+    }
+
+    public FailReason getParseFailedReason() {
+        return this.parseFailedReason;
+    }
+
+    public void setParseFailedReason(FailReason failReason) {
+        if (this.parseFailedReason == null) {
+            this.parseFailedReason = failReason;
+        }
+    }
+
+    public void recycle() {
+        this.parameterCount = 0;
+        this.paramHashValues.clear();
+        this.didQueryParameters = false;
+        this.charset = DEFAULT_BODY_CHARSET;
+        this.decodedQuery.recycle();
+        this.parseFailedReason = null;
+    }
+
+    public String[] getParameterValues(String name) {
+        handleQueryParameters();
+        ArrayList<String> values = this.paramHashValues.get(name);
+        if (values == null) {
+            return null;
+        }
+        return (String[]) values.toArray(new String[values.size()]);
+    }
+
+    public Enumeration<String> getParameterNames() {
+        handleQueryParameters();
+        return Collections.enumeration(this.paramHashValues.keySet());
+    }
+
+    public String getParameter(String name) {
+        handleQueryParameters();
+        ArrayList<String> values = this.paramHashValues.get(name);
+        if (values != null) {
+            if (values.size() == 0) {
+                return "";
+            }
+            return values.get(0);
+        }
+        return null;
+    }
+
+    public void handleQueryParameters() {
+        if (this.didQueryParameters) {
+            return;
+        }
+        this.didQueryParameters = true;
+        if (this.queryMB == null || this.queryMB.isNull()) {
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Decoding query " + this.decodedQuery + SymbolConstants.SPACE_SYMBOL + this.queryStringCharset.name());
+        }
+        try {
+            this.decodedQuery.duplicate(this.queryMB);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        processParameters(this.decodedQuery, this.queryStringCharset);
+    }
+
+    public void addParameter(String key, String value) throws IllegalStateException {
+        if (key == null) {
+            return;
+        }
+        this.parameterCount++;
+        if (this.limit > -1 && this.parameterCount > this.limit) {
+            setParseFailedReason(FailReason.TOO_MANY_PARAMETERS);
+            throw new IllegalStateException(sm.getString("parameters.maxCountFail", Integer.valueOf(this.limit)));
+        }
+        ArrayList<String> values = this.paramHashValues.get(key);
+        if (values == null) {
+            values = new ArrayList<>(1);
+            this.paramHashValues.put(key, values);
+        }
+        values.add(value);
+    }
+
+    public void setURLDecoder(UDecoder u) {
+        this.urlDec = u;
+    }
+
+    public void processParameters(byte[] bytes, int start, int len) {
+        processParameters(bytes, start, len, this.charset);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:137:0x022d A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:141:0x0155 A[SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:32:0x00e7  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct code enable 'Show inconsistent code' option in preferences
+    */
+    private void processParameters(byte[] r14, int r15, int r16, java.nio.charset.Charset r17) {
+        /*
+            Method dump skipped, instructions count: 1296
+            To view this dump change 'Code comments level' option to 'DEBUG'
+        */
+        throw new UnsupportedOperationException("Method not decompiled: org.apache.tomcat.util.http.Parameters.processParameters(byte[], int, int, java.nio.charset.Charset):void");
+    }
+
+    private void urlDecode(ByteChunk bc) throws IOException {
+        if (this.urlDec == null) {
+            this.urlDec = new UDecoder();
+        }
+        this.urlDec.convert(bc, true);
+    }
+
+    @Deprecated
+    public void processParameters(MessageBytes data, String encoding) {
+        processParameters(data, getCharset(encoding, DEFAULT_BODY_CHARSET));
+    }
+
+    public void processParameters(MessageBytes data, Charset charset) {
+        if (data == null || data.isNull() || data.getLength() <= 0) {
+            return;
+        }
+        if (data.getType() != 2) {
+            data.toBytes();
+        }
+        ByteChunk bc = data.getByteChunk();
+        processParameters(bc.getBytes(), bc.getOffset(), bc.getLength(), charset);
+    }
+
+    private Charset getCharset(String encoding, Charset defaultCharset) {
+        if (encoding == null) {
+            return defaultCharset;
+        }
+        try {
+            return B2CConverter.getCharset(encoding);
+        } catch (UnsupportedEncodingException e) {
+            return defaultCharset;
+        }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, ArrayList<String>> e : this.paramHashValues.entrySet()) {
+            sb.append(e.getKey()).append('=');
+            StringUtils.join((Iterable<String>) e.getValue(), ',', sb);
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
+}

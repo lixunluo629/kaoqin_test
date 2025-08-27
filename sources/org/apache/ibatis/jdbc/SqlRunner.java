@@ -1,0 +1,187 @@
+package org.apache.ibatis.jdbc;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.TypeHandlerRegistry;
+
+/* loaded from: mybatis-3.4.6.jar:org/apache/ibatis/jdbc/SqlRunner.class */
+public class SqlRunner {
+    public static final int NO_GENERATED_KEY = -2147482647;
+    private final Connection connection;
+    private final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+    private boolean useGeneratedKeySupport;
+
+    public SqlRunner(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void setUseGeneratedKeySupport(boolean useGeneratedKeySupport) {
+        this.useGeneratedKeySupport = useGeneratedKeySupport;
+    }
+
+    public Map<String, Object> selectOne(String sql, Object... args) throws SQLException {
+        List<Map<String, Object>> results = selectAll(sql, args);
+        if (results.size() != 1) {
+            throw new SQLException("Statement returned " + results.size() + " results where exactly one (1) was expected.");
+        }
+        return results.get(0);
+    }
+
+    public List<Map<String, Object>> selectAll(String sql, Object... args) throws SQLException {
+        PreparedStatement ps = this.connection.prepareStatement(sql);
+        try {
+            setParameters(ps, args);
+            ResultSet rs = ps.executeQuery();
+            return getResults(rs);
+        } finally {
+            try {
+                ps.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    public int insert(String sql, Object... args) throws SQLException {
+        PreparedStatement ps;
+        Object genkey;
+        if (this.useGeneratedKeySupport) {
+            ps = this.connection.prepareStatement(sql, 1);
+        } else {
+            ps = this.connection.prepareStatement(sql);
+        }
+        try {
+            setParameters(ps, args);
+            ps.executeUpdate();
+            if (this.useGeneratedKeySupport) {
+                List<Map<String, Object>> keys = getResults(ps.getGeneratedKeys());
+                if (keys.size() == 1) {
+                    Map<String, Object> key = keys.get(0);
+                    Iterator<Object> i = key.values().iterator();
+                    if (i.hasNext() && (genkey = i.next()) != null) {
+                        try {
+                            return Integer.parseInt(genkey.toString());
+                        } catch (NumberFormatException e) {
+                        }
+                    }
+                }
+            }
+            try {
+                ps.close();
+            } catch (SQLException e2) {
+            }
+            return NO_GENERATED_KEY;
+        } finally {
+            try {
+                ps.close();
+            } catch (SQLException e3) {
+            }
+        }
+    }
+
+    public int update(String sql, Object... args) throws SQLException {
+        PreparedStatement ps = this.connection.prepareStatement(sql);
+        try {
+            setParameters(ps, args);
+            return ps.executeUpdate();
+        } finally {
+            try {
+                ps.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    public int delete(String sql, Object... args) throws SQLException {
+        return update(sql, args);
+    }
+
+    public void run(String sql) throws SQLException {
+        Statement stmt = this.connection.createStatement();
+        try {
+            stmt.execute(sql);
+        } finally {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    public void closeConnection() throws SQLException {
+        try {
+            this.connection.close();
+        } catch (SQLException e) {
+        }
+    }
+
+    private void setParameters(PreparedStatement ps, Object... args) throws SQLException {
+        int n = args.length;
+        for (int i = 0; i < n; i++) {
+            if (args[i] == null) {
+                throw new SQLException("SqlRunner requires an instance of Null to represent typed null values for JDBC compatibility");
+            }
+            if (args[i] instanceof Null) {
+                ((Null) args[i]).getTypeHandler().setParameter(ps, i + 1, null, ((Null) args[i]).getJdbcType());
+            } else {
+                TypeHandler typeHandler = this.typeHandlerRegistry.getTypeHandler(args[i].getClass());
+                if (typeHandler == null) {
+                    throw new SQLException("SqlRunner could not find a TypeHandler instance for " + args[i].getClass());
+                }
+                typeHandler.setParameter(ps, i + 1, args[i], null);
+            }
+        }
+    }
+
+    private List<Map<String, Object>> getResults(ResultSet rs) throws SQLException {
+        try {
+            List<Map<String, Object>> list = new ArrayList<>();
+            List<String> columns = new ArrayList<>();
+            List<TypeHandler<?>> typeHandlers = new ArrayList<>();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int n = rsmd.getColumnCount();
+            for (int i = 0; i < n; i++) {
+                columns.add(rsmd.getColumnLabel(i + 1));
+                try {
+                    Class<?> type = Resources.classForName(rsmd.getColumnClassName(i + 1));
+                    TypeHandler<?> typeHandler = this.typeHandlerRegistry.getTypeHandler(type);
+                    if (typeHandler == null) {
+                        typeHandler = this.typeHandlerRegistry.getTypeHandler(Object.class);
+                    }
+                    typeHandlers.add(typeHandler);
+                } catch (Exception e) {
+                    typeHandlers.add(this.typeHandlerRegistry.getTypeHandler(Object.class));
+                }
+            }
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                int n2 = columns.size();
+                for (int i2 = 0; i2 < n2; i2++) {
+                    String name = columns.get(i2);
+                    TypeHandler<?> handler = typeHandlers.get(i2);
+                    row.put(name.toUpperCase(Locale.ENGLISH), handler.getResult(rs, name));
+                }
+                list.add(row);
+            }
+            return list;
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (Exception e2) {
+                }
+            }
+        }
+    }
+}

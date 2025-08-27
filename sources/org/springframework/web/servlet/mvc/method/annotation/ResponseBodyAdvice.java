@@ -1,0 +1,14 @@
+package org.springframework.web.servlet.mvc.method.annotation;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+
+/* loaded from: spring-webmvc-4.3.25.RELEASE.jar:org/springframework/web/servlet/mvc/method/annotation/ResponseBodyAdvice.class */
+public interface ResponseBodyAdvice<T> {
+    boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> cls);
+
+    T beforeBodyWrite(T t, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> cls, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse);
+}

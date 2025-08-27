@@ -1,0 +1,51 @@
+package org.apache.poi.ss.formula.ptg;
+
+import org.apache.poi.util.LittleEndianInput;
+import org.apache.poi.util.LittleEndianOutput;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
+
+/* loaded from: poi-3.17.jar:org/apache/poi/ss/formula/ptg/TblPtg.class */
+public final class TblPtg extends ControlPtg {
+    private static final int SIZE = 5;
+    public static final short sid = 2;
+    private final int field_1_first_row;
+    private final int field_2_first_col;
+
+    public TblPtg(LittleEndianInput in) {
+        this.field_1_first_row = in.readUShort();
+        this.field_2_first_col = in.readUShort();
+    }
+
+    @Override // org.apache.poi.ss.formula.ptg.Ptg
+    public void write(LittleEndianOutput out) {
+        out.writeByte(2 + getPtgClass());
+        out.writeShort(this.field_1_first_row);
+        out.writeShort(this.field_2_first_col);
+    }
+
+    @Override // org.apache.poi.ss.formula.ptg.Ptg
+    public int getSize() {
+        return 5;
+    }
+
+    public int getRow() {
+        return this.field_1_first_row;
+    }
+
+    public int getColumn() {
+        return this.field_2_first_col;
+    }
+
+    @Override // org.apache.poi.ss.formula.ptg.Ptg
+    public String toFormulaString() {
+        throw new RuntimeException("Table and Arrays are not yet supported");
+    }
+
+    @Override // org.apache.poi.ss.formula.ptg.Ptg
+    public String toString() {
+        StringBuffer buffer = new StringBuffer("[Data Table - Parent cell is an interior cell in a data table]\n");
+        buffer.append("top left row = ").append(getRow()).append(ScriptUtils.FALLBACK_STATEMENT_SEPARATOR);
+        buffer.append("top left col = ").append(getColumn()).append(ScriptUtils.FALLBACK_STATEMENT_SEPARATOR);
+        return buffer.toString();
+    }
+}

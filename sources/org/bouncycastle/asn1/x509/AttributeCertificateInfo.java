@@ -1,0 +1,116 @@
+package org.bouncycastle.asn1.x509;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
+
+/* JADX WARN: Classes with same name are omitted:
+  bcprov-jdk15on-1.64.jar:org/bouncycastle/asn1/x509/AttributeCertificateInfo.class
+ */
+/* loaded from: bcprov-jdk16-1.46.jar:org/bouncycastle/asn1/x509/AttributeCertificateInfo.class */
+public class AttributeCertificateInfo extends ASN1Encodable {
+    private DERInteger version;
+    private Holder holder;
+    private AttCertIssuer issuer;
+    private AlgorithmIdentifier signature;
+    private DERInteger serialNumber;
+    private AttCertValidityPeriod attrCertValidityPeriod;
+    private ASN1Sequence attributes;
+    private DERBitString issuerUniqueID;
+    private X509Extensions extensions;
+
+    public static AttributeCertificateInfo getInstance(ASN1TaggedObject aSN1TaggedObject, boolean z) {
+        return getInstance(ASN1Sequence.getInstance(aSN1TaggedObject, z));
+    }
+
+    public static AttributeCertificateInfo getInstance(Object obj) {
+        if (obj instanceof AttributeCertificateInfo) {
+            return (AttributeCertificateInfo) obj;
+        }
+        if (obj instanceof ASN1Sequence) {
+            return new AttributeCertificateInfo((ASN1Sequence) obj);
+        }
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+    }
+
+    public AttributeCertificateInfo(ASN1Sequence aSN1Sequence) {
+        if (aSN1Sequence.size() < 7 || aSN1Sequence.size() > 9) {
+            throw new IllegalArgumentException("Bad sequence size: " + aSN1Sequence.size());
+        }
+        this.version = DERInteger.getInstance(aSN1Sequence.getObjectAt(0));
+        this.holder = Holder.getInstance(aSN1Sequence.getObjectAt(1));
+        this.issuer = AttCertIssuer.getInstance(aSN1Sequence.getObjectAt(2));
+        this.signature = AlgorithmIdentifier.getInstance(aSN1Sequence.getObjectAt(3));
+        this.serialNumber = DERInteger.getInstance(aSN1Sequence.getObjectAt(4));
+        this.attrCertValidityPeriod = AttCertValidityPeriod.getInstance(aSN1Sequence.getObjectAt(5));
+        this.attributes = ASN1Sequence.getInstance(aSN1Sequence.getObjectAt(6));
+        for (int i = 7; i < aSN1Sequence.size(); i++) {
+            ASN1Encodable aSN1Encodable = (ASN1Encodable) aSN1Sequence.getObjectAt(i);
+            if (aSN1Encodable instanceof DERBitString) {
+                this.issuerUniqueID = DERBitString.getInstance(aSN1Sequence.getObjectAt(i));
+            } else if ((aSN1Encodable instanceof ASN1Sequence) || (aSN1Encodable instanceof X509Extensions)) {
+                this.extensions = X509Extensions.getInstance(aSN1Sequence.getObjectAt(i));
+            }
+        }
+    }
+
+    public DERInteger getVersion() {
+        return this.version;
+    }
+
+    public Holder getHolder() {
+        return this.holder;
+    }
+
+    public AttCertIssuer getIssuer() {
+        return this.issuer;
+    }
+
+    public AlgorithmIdentifier getSignature() {
+        return this.signature;
+    }
+
+    public DERInteger getSerialNumber() {
+        return this.serialNumber;
+    }
+
+    public AttCertValidityPeriod getAttrCertValidityPeriod() {
+        return this.attrCertValidityPeriod;
+    }
+
+    public ASN1Sequence getAttributes() {
+        return this.attributes;
+    }
+
+    public DERBitString getIssuerUniqueID() {
+        return this.issuerUniqueID;
+    }
+
+    public X509Extensions getExtensions() {
+        return this.extensions;
+    }
+
+    @Override // org.bouncycastle.asn1.ASN1Encodable
+    public DERObject toASN1Object() {
+        ASN1EncodableVector aSN1EncodableVector = new ASN1EncodableVector();
+        aSN1EncodableVector.add(this.version);
+        aSN1EncodableVector.add(this.holder);
+        aSN1EncodableVector.add(this.issuer);
+        aSN1EncodableVector.add(this.signature);
+        aSN1EncodableVector.add(this.serialNumber);
+        aSN1EncodableVector.add(this.attrCertValidityPeriod);
+        aSN1EncodableVector.add(this.attributes);
+        if (this.issuerUniqueID != null) {
+            aSN1EncodableVector.add(this.issuerUniqueID);
+        }
+        if (this.extensions != null) {
+            aSN1EncodableVector.add(this.extensions);
+        }
+        return new DERSequence(aSN1EncodableVector);
+    }
+}

@@ -1,0 +1,32 @@
+package org.bouncycastle.jce;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.x509.KeyUsage;
+
+/* JADX WARN: Classes with same name are omitted:
+  bcprov-jdk15on-1.64.jar:org/bouncycastle/jce/X509KeyUsage.class
+ */
+/* loaded from: bcprov-jdk16-1.46.jar:org/bouncycastle/jce/X509KeyUsage.class */
+public class X509KeyUsage extends ASN1Encodable {
+    public static final int digitalSignature = 128;
+    public static final int nonRepudiation = 64;
+    public static final int keyEncipherment = 32;
+    public static final int dataEncipherment = 16;
+    public static final int keyAgreement = 8;
+    public static final int keyCertSign = 4;
+    public static final int cRLSign = 2;
+    public static final int encipherOnly = 1;
+    public static final int decipherOnly = 32768;
+    private int usage;
+
+    public X509KeyUsage(int i) {
+        this.usage = 0;
+        this.usage = i;
+    }
+
+    @Override // org.bouncycastle.asn1.ASN1Encodable
+    public DERObject toASN1Object() {
+        return new KeyUsage(this.usage);
+    }
+}

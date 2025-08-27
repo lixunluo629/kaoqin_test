@@ -1,0 +1,158 @@
+package org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URL;
+import javax.xml.stream.XMLStreamReader;
+import org.apache.poi.POIXMLTypeLoader;
+import org.apache.xmlbeans.SchemaType;
+import org.apache.xmlbeans.XmlBeans;
+import org.apache.xmlbeans.XmlBoolean;
+import org.apache.xmlbeans.XmlException;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
+import org.apache.xmlbeans.XmlString;
+import org.apache.xmlbeans.xml.stream.XMLInputStream;
+import org.apache.xmlbeans.xml.stream.XMLStreamException;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTShapeProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTShapeStyle;
+import org.w3c.dom.Node;
+
+/* loaded from: poi-ooxml-schemas-3.17.jar:org/openxmlformats/schemas/drawingml/x2006/spreadsheetDrawing/CTConnector.class */
+public interface CTConnector extends XmlObject {
+    public static final SchemaType type = (SchemaType) XmlBeans.typeSystemForClassLoader(CTConnector.class.getClassLoader(), "schemaorg_apache_xmlbeans.system.sF1327CCA741569E70F9CA8C9AF9B44B2").resolveHandle("ctconnector3d37type");
+
+    /* loaded from: poi-ooxml-schemas-3.17.jar:org/openxmlformats/schemas/drawingml/x2006/spreadsheetDrawing/CTConnector$Factory.class */
+    public static final class Factory {
+        public static CTConnector newInstance() {
+            return (CTConnector) POIXMLTypeLoader.newInstance(CTConnector.type, null);
+        }
+
+        public static CTConnector newInstance(XmlOptions xmlOptions) {
+            return (CTConnector) POIXMLTypeLoader.newInstance(CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(String str) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(str, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(String str, XmlOptions xmlOptions) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(str, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(File file) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(file, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(File file, XmlOptions xmlOptions) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(file, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(URL url) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(url, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(URL url, XmlOptions xmlOptions) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(url, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(InputStream inputStream) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(inputStream, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(InputStream inputStream, XmlOptions xmlOptions) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(inputStream, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(Reader reader) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(reader, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(Reader reader, XmlOptions xmlOptions) throws XmlException, IOException {
+            return (CTConnector) POIXMLTypeLoader.parse(reader, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(XMLStreamReader xMLStreamReader) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(xMLStreamReader, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(XMLStreamReader xMLStreamReader, XmlOptions xmlOptions) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(xMLStreamReader, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(Node node) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(node, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(Node node, XmlOptions xmlOptions) throws XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(node, CTConnector.type, xmlOptions);
+        }
+
+        public static CTConnector parse(XMLInputStream xMLInputStream) throws XMLStreamException, XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(xMLInputStream, CTConnector.type, (XmlOptions) null);
+        }
+
+        public static CTConnector parse(XMLInputStream xMLInputStream, XmlOptions xmlOptions) throws XMLStreamException, XmlException {
+            return (CTConnector) POIXMLTypeLoader.parse(xMLInputStream, CTConnector.type, xmlOptions);
+        }
+
+        public static XMLInputStream newValidatingXMLInputStream(XMLInputStream xMLInputStream) throws XMLStreamException, XmlException {
+            return POIXMLTypeLoader.newValidatingXMLInputStream(xMLInputStream, CTConnector.type, null);
+        }
+
+        public static XMLInputStream newValidatingXMLInputStream(XMLInputStream xMLInputStream, XmlOptions xmlOptions) throws XMLStreamException, XmlException {
+            return POIXMLTypeLoader.newValidatingXMLInputStream(xMLInputStream, CTConnector.type, xmlOptions);
+        }
+
+        private Factory() {
+        }
+    }
+
+    CTConnectorNonVisual getNvCxnSpPr();
+
+    void setNvCxnSpPr(CTConnectorNonVisual cTConnectorNonVisual);
+
+    CTConnectorNonVisual addNewNvCxnSpPr();
+
+    CTShapeProperties getSpPr();
+
+    void setSpPr(CTShapeProperties cTShapeProperties);
+
+    CTShapeProperties addNewSpPr();
+
+    CTShapeStyle getStyle();
+
+    boolean isSetStyle();
+
+    void setStyle(CTShapeStyle cTShapeStyle);
+
+    CTShapeStyle addNewStyle();
+
+    void unsetStyle();
+
+    String getMacro();
+
+    XmlString xgetMacro();
+
+    boolean isSetMacro();
+
+    void setMacro(String str);
+
+    void xsetMacro(XmlString xmlString);
+
+    void unsetMacro();
+
+    boolean getFPublished();
+
+    XmlBoolean xgetFPublished();
+
+    boolean isSetFPublished();
+
+    void setFPublished(boolean z);
+
+    void xsetFPublished(XmlBoolean xmlBoolean);
+
+    void unsetFPublished();
+}

@@ -1,0 +1,25 @@
+package io.netty.util.internal.shaded.org.jctools.queues;
+
+/* compiled from: MpscArrayQueue.java */
+/* loaded from: netty-all-4.1.50.Final.jar:io/netty/util/internal/shaded/org/jctools/queues/MpscArrayQueueL2Pad.class */
+abstract class MpscArrayQueueL2Pad<E> extends MpscArrayQueueProducerLimitField<E> {
+    long p00;
+    long p01;
+    long p02;
+    long p03;
+    long p04;
+    long p05;
+    long p06;
+    long p07;
+    long p10;
+    long p11;
+    long p12;
+    long p13;
+    long p14;
+    long p15;
+    long p16;
+
+    MpscArrayQueueL2Pad(int capacity) {
+        super(capacity);
+    }
+}

@@ -1,0 +1,28 @@
+package javax.validation;
+
+import javax.validation.metadata.ConstraintDescriptor;
+
+/* loaded from: validation-api-1.1.0.Final.jar:javax/validation/ConstraintViolation.class */
+public interface ConstraintViolation<T> {
+    String getMessage();
+
+    String getMessageTemplate();
+
+    T getRootBean();
+
+    Class<T> getRootBeanClass();
+
+    Object getLeafBean();
+
+    Object[] getExecutableParameters();
+
+    Object getExecutableReturnValue();
+
+    Path getPropertyPath();
+
+    Object getInvalidValue();
+
+    ConstraintDescriptor<?> getConstraintDescriptor();
+
+    <U> U unwrap(Class<U> cls);
+}

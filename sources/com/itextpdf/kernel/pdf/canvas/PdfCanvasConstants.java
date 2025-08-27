@@ -1,0 +1,40 @@
+package com.itextpdf.kernel.pdf.canvas;
+
+/* loaded from: kernel-7.1.10.jar:com/itextpdf/kernel/pdf/canvas/PdfCanvasConstants.class */
+public class PdfCanvasConstants {
+
+    /* loaded from: kernel-7.1.10.jar:com/itextpdf/kernel/pdf/canvas/PdfCanvasConstants$FillingRule.class */
+    public static class FillingRule {
+        public static final int NONZERO_WINDING = 1;
+        public static final int EVEN_ODD = 2;
+    }
+
+    /* loaded from: kernel-7.1.10.jar:com/itextpdf/kernel/pdf/canvas/PdfCanvasConstants$LineCapStyle.class */
+    public static class LineCapStyle {
+        public static final int BUTT = 0;
+        public static final int ROUND = 1;
+        public static final int PROJECTING_SQUARE = 2;
+    }
+
+    /* loaded from: kernel-7.1.10.jar:com/itextpdf/kernel/pdf/canvas/PdfCanvasConstants$LineJoinStyle.class */
+    public static class LineJoinStyle {
+        public static final int MITER = 0;
+        public static final int ROUND = 1;
+        public static final int BEVEL = 2;
+    }
+
+    /* loaded from: kernel-7.1.10.jar:com/itextpdf/kernel/pdf/canvas/PdfCanvasConstants$TextRenderingMode.class */
+    public static final class TextRenderingMode {
+        public static final int FILL = 0;
+        public static final int STROKE = 1;
+        public static final int FILL_STROKE = 2;
+        public static final int INVISIBLE = 3;
+        public static final int FILL_CLIP = 4;
+        public static final int STROKE_CLIP = 5;
+        public static final int FILL_STROKE_CLIP = 6;
+        public static final int CLIP = 7;
+
+        private TextRenderingMode() {
+        }
+    }
+}

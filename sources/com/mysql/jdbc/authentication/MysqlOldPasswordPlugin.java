@@ -1,0 +1,69 @@
+package com.mysql.jdbc.authentication;
+
+import com.mysql.jdbc.AuthenticationPlugin;
+import com.mysql.jdbc.Buffer;
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.StringUtils;
+import com.mysql.jdbc.Util;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Properties;
+
+/* loaded from: mysql-connector-java-5.1.48.jar:com/mysql/jdbc/authentication/MysqlOldPasswordPlugin.class */
+public class MysqlOldPasswordPlugin implements AuthenticationPlugin {
+    private Connection connection;
+    private String password = null;
+
+    @Override // com.mysql.jdbc.Extension
+    public void init(Connection conn, Properties props) throws SQLException {
+        this.connection = conn;
+    }
+
+    @Override // com.mysql.jdbc.Extension
+    public void destroy() {
+        this.password = null;
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public String getProtocolPluginName() {
+        return "mysql_old_password";
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public boolean requiresConfidentiality() {
+        return false;
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public boolean isReusable() {
+        return true;
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public void setAuthenticationParameters(String user, String password) {
+        this.password = password;
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public boolean nextAuthenticationStep(Buffer fromServer, List<Buffer> toServer) throws SQLException {
+        Buffer bresp;
+        toServer.clear();
+        String pwd = this.password;
+        if (fromServer == null || pwd == null || pwd.length() == 0) {
+            bresp = new Buffer(new byte[0]);
+        } else {
+            bresp = new Buffer(StringUtils.getBytes(Util.newCrypt(pwd, fromServer.readString().substring(0, 8), this.connection.getPasswordCharacterEncoding())));
+            bresp.setPosition(bresp.getBufLength());
+            int oldBufLength = bresp.getBufLength();
+            bresp.writeByte((byte) 0);
+            bresp.setBufLength(oldBufLength + 1);
+            bresp.setPosition(0);
+        }
+        toServer.add(bresp);
+        return true;
+    }
+
+    @Override // com.mysql.jdbc.AuthenticationPlugin
+    public void reset() {
+    }
+}

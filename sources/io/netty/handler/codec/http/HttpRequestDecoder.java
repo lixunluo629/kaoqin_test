@@ -1,0 +1,34 @@
+package io.netty.handler.codec.http;
+
+/* loaded from: netty-all-4.1.50.Final.jar:io/netty/handler/codec/http/HttpRequestDecoder.class */
+public class HttpRequestDecoder extends HttpObjectDecoder {
+    public HttpRequestDecoder() {
+    }
+
+    public HttpRequestDecoder(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize) {
+        super(maxInitialLineLength, maxHeaderSize, maxChunkSize, true);
+    }
+
+    public HttpRequestDecoder(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize, boolean validateHeaders) {
+        super(maxInitialLineLength, maxHeaderSize, maxChunkSize, true, validateHeaders);
+    }
+
+    public HttpRequestDecoder(int maxInitialLineLength, int maxHeaderSize, int maxChunkSize, boolean validateHeaders, int initialBufferSize) {
+        super(maxInitialLineLength, maxHeaderSize, maxChunkSize, true, validateHeaders, initialBufferSize);
+    }
+
+    @Override // io.netty.handler.codec.http.HttpObjectDecoder
+    protected HttpMessage createMessage(String[] initialLine) throws Exception {
+        return new DefaultHttpRequest(HttpVersion.valueOf(initialLine[2]), HttpMethod.valueOf(initialLine[0]), initialLine[1], this.validateHeaders);
+    }
+
+    @Override // io.netty.handler.codec.http.HttpObjectDecoder
+    protected HttpMessage createInvalidMessage() {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-request", this.validateHeaders);
+    }
+
+    @Override // io.netty.handler.codec.http.HttpObjectDecoder
+    protected boolean isDecodingRequest() {
+        return true;
+    }
+}

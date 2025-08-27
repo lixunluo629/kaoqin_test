@@ -1,0 +1,5 @@
+package org.bouncycastle.cert.ocsp;
+
+/* loaded from: bcpkix-jdk15on-1.64.jar:org/bouncycastle/cert/ocsp/UnknownStatus.class */
+public class UnknownStatus implements CertificateStatus {
+}

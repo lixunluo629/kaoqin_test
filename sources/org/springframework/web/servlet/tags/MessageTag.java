@@ -1,0 +1,163 @@
+package org.springframework.web.servlet.tags;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.JavaScriptUtils;
+import org.springframework.web.util.TagUtils;
+
+/* loaded from: spring-webmvc-4.3.25.RELEASE.jar:org/springframework/web/servlet/tags/MessageTag.class */
+public class MessageTag extends HtmlEscapingAwareTag implements ArgumentAware {
+    public static final String DEFAULT_ARGUMENT_SEPARATOR = ",";
+    private MessageSourceResolvable message;
+    private String code;
+    private Object arguments;
+    private List<Object> nestedArguments;
+    private String text;
+    private String var;
+    private String argumentSeparator = ",";
+    private String scope = TagUtils.SCOPE_PAGE;
+    private boolean javaScriptEscape = false;
+
+    public void setMessage(MessageSourceResolvable message) {
+        this.message = message;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setArguments(Object arguments) {
+        this.arguments = arguments;
+    }
+
+    public void setArgumentSeparator(String argumentSeparator) {
+        this.argumentSeparator = argumentSeparator;
+    }
+
+    @Override // org.springframework.web.servlet.tags.ArgumentAware
+    public void addArgument(Object argument) throws JspTagException {
+        this.nestedArguments.add(argument);
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setVar(String var) {
+        this.var = var;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public void setJavaScriptEscape(boolean javaScriptEscape) throws JspException {
+        this.javaScriptEscape = javaScriptEscape;
+    }
+
+    @Override // org.springframework.web.servlet.tags.RequestContextAwareTag
+    protected final int doStartTagInternal() throws JspException, IOException {
+        this.nestedArguments = new LinkedList();
+        return 1;
+    }
+
+    /* JADX INFO: Thrown type has an unknown type hierarchy: javax.servlet.jsp.JspTagException */
+    public int doEndTag() throws JspException, JspTagException {
+        try {
+            String msg = htmlEscape(resolveMessage());
+            String msg2 = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(msg) : msg;
+            if (this.var != null) {
+                this.pageContext.setAttribute(this.var, msg2, TagUtils.getScope(this.scope));
+                return 6;
+            }
+            writeMessage(msg2);
+            return 6;
+        } catch (IOException ex) {
+            throw new JspTagException(ex.getMessage(), ex);
+        } catch (NoSuchMessageException ex2) {
+            throw new JspTagException(getNoSuchMessageExceptionDescription(ex2));
+        }
+    }
+
+    public void release() {
+        super.release();
+        this.arguments = null;
+    }
+
+    /* JADX INFO: Thrown type has an unknown type hierarchy: javax.servlet.jsp.JspTagException */
+    protected String resolveMessage() throws NoSuchMessageException, JspException, JspTagException {
+        MessageSource messageSource = getMessageSource();
+        if (messageSource == null) {
+            throw new JspTagException("No corresponding MessageSource found");
+        }
+        if (this.message != null) {
+            return messageSource.getMessage(this.message, getRequestContext().getLocale());
+        }
+        if (this.code != null || this.text != null) {
+            Object[] argumentsArray = resolveArguments(this.arguments);
+            if (!this.nestedArguments.isEmpty()) {
+                argumentsArray = appendArguments(argumentsArray, this.nestedArguments.toArray());
+            }
+            if (this.text != null) {
+                return messageSource.getMessage(this.code, argumentsArray, this.text, getRequestContext().getLocale());
+            }
+            return messageSource.getMessage(this.code, argumentsArray, getRequestContext().getLocale());
+        }
+        return this.text;
+    }
+
+    private Object[] appendArguments(Object[] sourceArguments, Object[] additionalArguments) {
+        if (ObjectUtils.isEmpty(sourceArguments)) {
+            return additionalArguments;
+        }
+        Object[] arguments = new Object[sourceArguments.length + additionalArguments.length];
+        System.arraycopy(sourceArguments, 0, arguments, 0, sourceArguments.length);
+        System.arraycopy(additionalArguments, 0, arguments, sourceArguments.length, additionalArguments.length);
+        return arguments;
+    }
+
+    protected Object[] resolveArguments(Object arguments) throws JspException {
+        if (arguments instanceof String) {
+            Object[] stringArray = StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);
+            if (stringArray.length == 1) {
+                Object argument = stringArray[0];
+                if (argument != null && argument.getClass().isArray()) {
+                    return ObjectUtils.toObjectArray(argument);
+                }
+                return new Object[]{argument};
+            }
+            return stringArray;
+        }
+        if (arguments instanceof Object[]) {
+            return (Object[]) arguments;
+        }
+        if (arguments instanceof Collection) {
+            return ((Collection) arguments).toArray();
+        }
+        if (arguments != null) {
+            return new Object[]{arguments};
+        }
+        return null;
+    }
+
+    protected void writeMessage(String msg) throws IOException {
+        this.pageContext.getOut().write(String.valueOf(msg));
+    }
+
+    protected MessageSource getMessageSource() {
+        return getRequestContext().getMessageSource();
+    }
+
+    protected String getNoSuchMessageExceptionDescription(NoSuchMessageException ex) {
+        return ex.getMessage();
+    }
+}

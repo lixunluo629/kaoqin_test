@@ -1,0 +1,50 @@
+package org.openxmlformats.schemas.presentationml.x2006.main.impl;
+
+import javax.xml.namespace.QName;
+import org.apache.xmlbeans.SchemaType;
+import org.apache.xmlbeans.impl.values.XmlComplexContentImpl;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTCommentAuthorList;
+import org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument;
+
+/* loaded from: poi-ooxml-schemas-3.17.jar:org/openxmlformats/schemas/presentationml/x2006/main/impl/CmAuthorLstDocumentImpl.class */
+public class CmAuthorLstDocumentImpl extends XmlComplexContentImpl implements CmAuthorLstDocument {
+    private static final QName CMAUTHORLST$0 = new QName("http://schemas.openxmlformats.org/presentationml/2006/main", "cmAuthorLst");
+
+    public CmAuthorLstDocumentImpl(SchemaType schemaType) {
+        super(schemaType);
+    }
+
+    @Override // org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument
+    public CTCommentAuthorList getCmAuthorLst() {
+        synchronized (monitor()) {
+            check_orphaned();
+            CTCommentAuthorList cTCommentAuthorList = (CTCommentAuthorList) get_store().find_element_user(CMAUTHORLST$0, 0);
+            if (cTCommentAuthorList == null) {
+                return null;
+            }
+            return cTCommentAuthorList;
+        }
+    }
+
+    @Override // org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument
+    public void setCmAuthorLst(CTCommentAuthorList cTCommentAuthorList) {
+        synchronized (monitor()) {
+            check_orphaned();
+            CTCommentAuthorList cTCommentAuthorList2 = (CTCommentAuthorList) get_store().find_element_user(CMAUTHORLST$0, 0);
+            if (cTCommentAuthorList2 == null) {
+                cTCommentAuthorList2 = (CTCommentAuthorList) get_store().add_element_user(CMAUTHORLST$0);
+            }
+            cTCommentAuthorList2.set(cTCommentAuthorList);
+        }
+    }
+
+    @Override // org.openxmlformats.schemas.presentationml.x2006.main.CmAuthorLstDocument
+    public CTCommentAuthorList addNewCmAuthorLst() {
+        CTCommentAuthorList cTCommentAuthorList;
+        synchronized (monitor()) {
+            check_orphaned();
+            cTCommentAuthorList = (CTCommentAuthorList) get_store().add_element_user(CMAUTHORLST$0);
+        }
+        return cTCommentAuthorList;
+    }
+}

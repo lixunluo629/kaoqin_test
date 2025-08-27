@@ -1,0 +1,43 @@
+package org.bouncycastle.util;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
+/* JADX WARN: Classes with same name are omitted:
+  bcprov-jdk15on-1.64.jar:org/bouncycastle/util/BigIntegers.class
+ */
+/* loaded from: bcprov-jdk16-1.46.jar:org/bouncycastle/util/BigIntegers.class */
+public final class BigIntegers {
+    private static final int MAX_ITERATIONS = 1000;
+    private static final BigInteger ZERO = BigInteger.valueOf(0);
+
+    public static byte[] asUnsignedByteArray(BigInteger bigInteger) {
+        byte[] byteArray = bigInteger.toByteArray();
+        if (byteArray[0] != 0) {
+            return byteArray;
+        }
+        byte[] bArr = new byte[byteArray.length - 1];
+        System.arraycopy(byteArray, 1, bArr, 0, bArr.length);
+        return bArr;
+    }
+
+    public static BigInteger createRandomInRange(BigInteger bigInteger, BigInteger bigInteger2, SecureRandom secureRandom) {
+        int iCompareTo = bigInteger.compareTo(bigInteger2);
+        if (iCompareTo >= 0) {
+            if (iCompareTo > 0) {
+                throw new IllegalArgumentException("'min' may not be greater than 'max'");
+            }
+            return bigInteger;
+        }
+        if (bigInteger.bitLength() > bigInteger2.bitLength() / 2) {
+            return createRandomInRange(ZERO, bigInteger2.subtract(bigInteger), secureRandom).add(bigInteger);
+        }
+        for (int i = 0; i < 1000; i++) {
+            BigInteger bigInteger3 = new BigInteger(bigInteger2.bitLength(), secureRandom);
+            if (bigInteger3.compareTo(bigInteger) >= 0 && bigInteger3.compareTo(bigInteger2) <= 0) {
+                return bigInteger3;
+            }
+        }
+        return new BigInteger(bigInteger2.subtract(bigInteger).bitLength() - 1, secureRandom).add(bigInteger);
+    }
+}

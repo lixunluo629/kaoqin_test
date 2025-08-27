@@ -1,0 +1,25 @@
+package com.google.common.util.concurrent;
+
+import com.google.common.annotations.GwtCompatible;
+import javax.annotation.Nullable;
+
+@GwtCompatible
+/* loaded from: guava-18.0.jar:com/google/common/util/concurrent/ExecutionError.class */
+public class ExecutionError extends Error {
+    private static final long serialVersionUID = 0;
+
+    protected ExecutionError() {
+    }
+
+    protected ExecutionError(@Nullable String message) {
+        super(message);
+    }
+
+    public ExecutionError(@Nullable String message, @Nullable Error cause) {
+        super(message, cause);
+    }
+
+    public ExecutionError(@Nullable Error cause) {
+        super(cause);
+    }
+}

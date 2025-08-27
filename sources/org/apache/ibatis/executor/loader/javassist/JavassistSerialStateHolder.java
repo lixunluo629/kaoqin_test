@@ -1,0 +1,24 @@
+package org.apache.ibatis.executor.loader.javassist;
+
+import java.util.List;
+import java.util.Map;
+import org.apache.ibatis.executor.loader.AbstractSerialStateHolder;
+import org.apache.ibatis.executor.loader.ResultLoaderMap;
+import org.apache.ibatis.reflection.factory.ObjectFactory;
+
+/* loaded from: mybatis-3.4.6.jar:org/apache/ibatis/executor/loader/javassist/JavassistSerialStateHolder.class */
+class JavassistSerialStateHolder extends AbstractSerialStateHolder {
+    private static final long serialVersionUID = 8940388717901644661L;
+
+    public JavassistSerialStateHolder() {
+    }
+
+    public JavassistSerialStateHolder(Object userBean, Map<String, ResultLoaderMap.LoadPair> unloadedProperties, ObjectFactory objectFactory, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
+        super(userBean, unloadedProperties, objectFactory, constructorArgTypes, constructorArgs);
+    }
+
+    @Override // org.apache.ibatis.executor.loader.AbstractSerialStateHolder
+    protected Object createDeserializationProxy(Object target, Map<String, ResultLoaderMap.LoadPair> unloadedProperties, ObjectFactory objectFactory, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
+        return new JavassistProxyFactory().createDeserializationProxy(target, unloadedProperties, objectFactory, constructorArgTypes, constructorArgs);
+    }
+}

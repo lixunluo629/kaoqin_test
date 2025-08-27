@@ -1,0 +1,15 @@
+package org.junit.experimental.theories.internal;
+
+import java.util.Arrays;
+import java.util.List;
+import org.junit.experimental.theories.ParameterSignature;
+import org.junit.experimental.theories.ParameterSupplier;
+import org.junit.experimental.theories.PotentialAssignment;
+
+/* loaded from: junit-4.12.jar:org/junit/experimental/theories/internal/BooleanSupplier.class */
+public class BooleanSupplier extends ParameterSupplier {
+    @Override // org.junit.experimental.theories.ParameterSupplier
+    public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
+        return Arrays.asList(PotentialAssignment.forValue("true", true), PotentialAssignment.forValue("false", false));
+    }
+}

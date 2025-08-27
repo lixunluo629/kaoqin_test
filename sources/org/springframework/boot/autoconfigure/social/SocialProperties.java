@@ -1,0 +1,23 @@
+package org.springframework.boot.autoconfigure.social;
+
+/* loaded from: spring-boot-autoconfigure-1.5.22.RELEASE.jar:org/springframework/boot/autoconfigure/social/SocialProperties.class */
+public abstract class SocialProperties {
+    private String appId;
+    private String appSecret;
+
+    public String getAppId() {
+        return this.appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public String getAppSecret() {
+        return this.appSecret;
+    }
+
+    public void setAppSecret(String appSecret) {
+        this.appSecret = appSecret;
+    }
+}

@@ -1,0 +1,14 @@
+package org.bouncycastle.crypto.tls;
+
+import java.io.ByteArrayOutputStream;
+import org.bouncycastle.crypto.Signer;
+
+/* loaded from: bcprov-jdk15on-1.64.jar:org/bouncycastle/crypto/tls/SignerInputBuffer.class */
+class SignerInputBuffer extends ByteArrayOutputStream {
+    SignerInputBuffer() {
+    }
+
+    void updateSigner(Signer signer) {
+        signer.update(this.buf, 0, this.count);
+    }
+}

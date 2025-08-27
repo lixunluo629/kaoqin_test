@@ -1,0 +1,25 @@
+package org.springframework.beans.factory.config;
+
+import org.springframework.beans.BeansException;
+import org.springframework.util.StringValueResolver;
+
+/* loaded from: spring-beans-4.3.25.RELEASE.jar:org/springframework/beans/factory/config/EmbeddedValueResolver.class */
+public class EmbeddedValueResolver implements StringValueResolver {
+    private final BeanExpressionContext exprContext;
+    private final BeanExpressionResolver exprResolver;
+
+    public EmbeddedValueResolver(ConfigurableBeanFactory beanFactory) {
+        this.exprContext = new BeanExpressionContext(beanFactory, null);
+        this.exprResolver = beanFactory.getBeanExpressionResolver();
+    }
+
+    @Override // org.springframework.util.StringValueResolver
+    public String resolveStringValue(String strVal) throws BeansException {
+        String value = this.exprContext.getBeanFactory().resolveEmbeddedValue(strVal);
+        if (this.exprResolver != null && value != null) {
+            Object evaluated = this.exprResolver.evaluate(value, this.exprContext);
+            value = evaluated != null ? evaluated.toString() : null;
+        }
+        return value;
+    }
+}

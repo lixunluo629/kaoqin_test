@@ -1,0 +1,52 @@
+package org.springframework.scheduling.quartz;
+
+import java.util.Map;
+import org.quartz.SchedulerContext;
+import org.quartz.spi.TriggerFiredBundle;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessorFactory;
+
+/* loaded from: spring-context-support-4.3.25.RELEASE.jar:org/springframework/scheduling/quartz/SpringBeanJobFactory.class */
+public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware {
+    private String[] ignoredUnknownProperties;
+    private SchedulerContext schedulerContext;
+
+    public void setIgnoredUnknownProperties(String... ignoredUnknownProperties) {
+        this.ignoredUnknownProperties = ignoredUnknownProperties;
+    }
+
+    @Override // org.springframework.scheduling.quartz.SchedulerContextAware
+    public void setSchedulerContext(SchedulerContext schedulerContext) {
+        this.schedulerContext = schedulerContext;
+    }
+
+    @Override // org.springframework.scheduling.quartz.AdaptableJobFactory
+    protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
+        Object job = super.createJobInstance(bundle);
+        if (isEligibleForPropertyPopulation(job)) {
+            BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(job);
+            MutablePropertyValues pvs = new MutablePropertyValues();
+            if (this.schedulerContext != null) {
+                pvs.addPropertyValues((Map<?, ?>) this.schedulerContext);
+            }
+            pvs.addPropertyValues((Map<?, ?>) bundle.getJobDetail().getJobDataMap());
+            pvs.addPropertyValues((Map<?, ?>) bundle.getTrigger().getJobDataMap());
+            if (this.ignoredUnknownProperties != null) {
+                for (String propName : this.ignoredUnknownProperties) {
+                    if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
+                        pvs.removePropertyValue(propName);
+                    }
+                }
+                bw.setPropertyValues(pvs);
+            } else {
+                bw.setPropertyValues(pvs, true);
+            }
+        }
+        return job;
+    }
+
+    protected boolean isEligibleForPropertyPopulation(Object jobObject) {
+        return !(jobObject instanceof QuartzJobBean);
+    }
+}

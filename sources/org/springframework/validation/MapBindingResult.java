@@ -1,0 +1,30 @@
+package org.springframework.validation;
+
+import java.io.Serializable;
+import java.util.Map;
+import org.springframework.util.Assert;
+
+/* loaded from: spring-context-4.3.25.RELEASE.jar:org/springframework/validation/MapBindingResult.class */
+public class MapBindingResult extends AbstractBindingResult implements Serializable {
+    private final Map<?, ?> target;
+
+    public MapBindingResult(Map<?, ?> target, String objectName) {
+        super(objectName);
+        Assert.notNull(target, "Target Map must not be null");
+        this.target = target;
+    }
+
+    public final Map<?, ?> getTargetMap() {
+        return this.target;
+    }
+
+    @Override // org.springframework.validation.AbstractBindingResult, org.springframework.validation.BindingResult
+    public final Object getTarget() {
+        return this.target;
+    }
+
+    @Override // org.springframework.validation.AbstractBindingResult
+    protected Object getActualFieldValue(String field) {
+        return this.target.get(field);
+    }
+}

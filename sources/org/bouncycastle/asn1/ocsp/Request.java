@@ -1,0 +1,63 @@
+package org.bouncycastle.asn1.ocsp;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.x509.X509Extensions;
+
+/* JADX WARN: Classes with same name are omitted:
+  bcprov-jdk15on-1.64.jar:org/bouncycastle/asn1/ocsp/Request.class
+ */
+/* loaded from: bcprov-jdk16-1.46.jar:org/bouncycastle/asn1/ocsp/Request.class */
+public class Request extends ASN1Encodable {
+    CertID reqCert;
+    X509Extensions singleRequestExtensions;
+
+    public Request(CertID certID, X509Extensions x509Extensions) {
+        this.reqCert = certID;
+        this.singleRequestExtensions = x509Extensions;
+    }
+
+    public Request(ASN1Sequence aSN1Sequence) {
+        this.reqCert = CertID.getInstance(aSN1Sequence.getObjectAt(0));
+        if (aSN1Sequence.size() == 2) {
+            this.singleRequestExtensions = X509Extensions.getInstance((ASN1TaggedObject) aSN1Sequence.getObjectAt(1), true);
+        }
+    }
+
+    public static Request getInstance(ASN1TaggedObject aSN1TaggedObject, boolean z) {
+        return getInstance(ASN1Sequence.getInstance(aSN1TaggedObject, z));
+    }
+
+    public static Request getInstance(Object obj) {
+        if (obj == null || (obj instanceof Request)) {
+            return (Request) obj;
+        }
+        if (obj instanceof ASN1Sequence) {
+            return new Request((ASN1Sequence) obj);
+        }
+        throw new IllegalArgumentException("unknown object in factory: " + obj.getClass().getName());
+    }
+
+    public CertID getReqCert() {
+        return this.reqCert;
+    }
+
+    public X509Extensions getSingleRequestExtensions() {
+        return this.singleRequestExtensions;
+    }
+
+    @Override // org.bouncycastle.asn1.ASN1Encodable
+    public DERObject toASN1Object() {
+        ASN1EncodableVector aSN1EncodableVector = new ASN1EncodableVector();
+        aSN1EncodableVector.add(this.reqCert);
+        if (this.singleRequestExtensions != null) {
+            aSN1EncodableVector.add(new DERTaggedObject(true, 0, this.singleRequestExtensions));
+        }
+        return new DERSequence(aSN1EncodableVector);
+    }
+}

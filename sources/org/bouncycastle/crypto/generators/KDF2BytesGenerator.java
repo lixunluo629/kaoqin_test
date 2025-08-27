@@ -1,0 +1,13 @@
+package org.bouncycastle.crypto.generators;
+
+import org.bouncycastle.crypto.Digest;
+
+/* JADX WARN: Classes with same name are omitted:
+  bcprov-jdk15on-1.64.jar:org/bouncycastle/crypto/generators/KDF2BytesGenerator.class
+ */
+/* loaded from: bcprov-jdk16-1.46.jar:org/bouncycastle/crypto/generators/KDF2BytesGenerator.class */
+public class KDF2BytesGenerator extends BaseKDFBytesGenerator {
+    public KDF2BytesGenerator(Digest digest) {
+        super(1, digest);
+    }
+}

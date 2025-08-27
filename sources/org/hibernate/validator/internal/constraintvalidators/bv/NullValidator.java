@@ -1,0 +1,17 @@
+package org.hibernate.validator.internal.constraintvalidators.bv;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Null;
+
+/* loaded from: hibernate-validator-5.3.6.Final.jar:org/hibernate/validator/internal/constraintvalidators/bv/NullValidator.class */
+public class NullValidator implements ConstraintValidator<Null, Object> {
+    @Override // javax.validation.ConstraintValidator
+    public void initialize(Null constraintAnnotation) {
+    }
+
+    @Override // javax.validation.ConstraintValidator
+    public boolean isValid(Object object, ConstraintValidatorContext constraintValidatorContext) {
+        return object == null;
+    }
+}

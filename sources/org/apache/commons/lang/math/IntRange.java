@@ -1,0 +1,213 @@
+package org.apache.commons.lang.math;
+
+import java.io.Serializable;
+import org.apache.commons.lang.text.StrBuilder;
+
+/* loaded from: commons-lang-2.6.jar:org/apache/commons/lang/math/IntRange.class */
+public final class IntRange extends Range implements Serializable {
+    private static final long serialVersionUID = 71849363892730L;
+    private final int min;
+    private final int max;
+    private transient Integer minObject;
+    private transient Integer maxObject;
+    private transient int hashCode;
+    private transient String toString;
+
+    public IntRange(int number) {
+        this.minObject = null;
+        this.maxObject = null;
+        this.hashCode = 0;
+        this.toString = null;
+        this.min = number;
+        this.max = number;
+    }
+
+    public IntRange(Number number) {
+        this.minObject = null;
+        this.maxObject = null;
+        this.hashCode = 0;
+        this.toString = null;
+        if (number == null) {
+            throw new IllegalArgumentException("The number must not be null");
+        }
+        this.min = number.intValue();
+        this.max = number.intValue();
+        if (number instanceof Integer) {
+            this.minObject = (Integer) number;
+            this.maxObject = (Integer) number;
+        }
+    }
+
+    public IntRange(int number1, int number2) {
+        this.minObject = null;
+        this.maxObject = null;
+        this.hashCode = 0;
+        this.toString = null;
+        if (number2 < number1) {
+            this.min = number2;
+            this.max = number1;
+        } else {
+            this.min = number1;
+            this.max = number2;
+        }
+    }
+
+    public IntRange(Number number1, Number number2) {
+        this.minObject = null;
+        this.maxObject = null;
+        this.hashCode = 0;
+        this.toString = null;
+        if (number1 == null || number2 == null) {
+            throw new IllegalArgumentException("The numbers must not be null");
+        }
+        int number1val = number1.intValue();
+        int number2val = number2.intValue();
+        if (number2val < number1val) {
+            this.min = number2val;
+            this.max = number1val;
+            if (number2 instanceof Integer) {
+                this.minObject = (Integer) number2;
+            }
+            if (number1 instanceof Integer) {
+                this.maxObject = (Integer) number1;
+                return;
+            }
+            return;
+        }
+        this.min = number1val;
+        this.max = number2val;
+        if (number1 instanceof Integer) {
+            this.minObject = (Integer) number1;
+        }
+        if (number2 instanceof Integer) {
+            this.maxObject = (Integer) number2;
+        }
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public Number getMinimumNumber() {
+        if (this.minObject == null) {
+            this.minObject = new Integer(this.min);
+        }
+        return this.minObject;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public long getMinimumLong() {
+        return this.min;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public int getMinimumInteger() {
+        return this.min;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public double getMinimumDouble() {
+        return this.min;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public float getMinimumFloat() {
+        return this.min;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public Number getMaximumNumber() {
+        if (this.maxObject == null) {
+            this.maxObject = new Integer(this.max);
+        }
+        return this.maxObject;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public long getMaximumLong() {
+        return this.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public int getMaximumInteger() {
+        return this.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public double getMaximumDouble() {
+        return this.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public float getMaximumFloat() {
+        return this.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public boolean containsNumber(Number number) {
+        if (number == null) {
+            return false;
+        }
+        return containsInteger(number.intValue());
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public boolean containsInteger(int value) {
+        return value >= this.min && value <= this.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public boolean containsRange(Range range) {
+        return range != null && containsInteger(range.getMinimumInteger()) && containsInteger(range.getMaximumInteger());
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public boolean overlapsRange(Range range) {
+        if (range == null) {
+            return false;
+        }
+        return range.containsInteger(this.min) || range.containsInteger(this.max) || containsInteger(range.getMinimumInteger());
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof IntRange)) {
+            return false;
+        }
+        IntRange range = (IntRange) obj;
+        return this.min == range.min && this.max == range.max;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public int hashCode() {
+        if (this.hashCode == 0) {
+            this.hashCode = 17;
+            this.hashCode = (37 * this.hashCode) + getClass().hashCode();
+            this.hashCode = (37 * this.hashCode) + this.min;
+            this.hashCode = (37 * this.hashCode) + this.max;
+        }
+        return this.hashCode;
+    }
+
+    @Override // org.apache.commons.lang.math.Range
+    public String toString() {
+        if (this.toString == null) {
+            StrBuilder buf = new StrBuilder(32);
+            buf.append("Range[");
+            buf.append(this.min);
+            buf.append(',');
+            buf.append(this.max);
+            buf.append(']');
+            this.toString = buf.toString();
+        }
+        return this.toString;
+    }
+
+    public int[] toArray() {
+        int[] array = new int[(this.max - this.min) + 1];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = this.min + i;
+        }
+        return array;
+    }
+}
