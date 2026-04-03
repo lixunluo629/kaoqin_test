@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易音频录音机</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 { margin-top: 0; color: #333; font-size: 24px; }
+        
+        /* 按钮样式 */
+        .btn {
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-weight: bold;
+            width: 120px;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-record { background-color: #ff4b4b; color: white; }
+        .btn-stop { background-color: #333; color: white; display: none; }
+        .btn-download { background-color: #007bff; color: white; text-decoration: none; display: inline-block; margin-top: 15px;}
+        
+        /* 状态指示 */
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            height: 20px;
+        }
+        .recording-indicator {
+            color: #ff4b4b;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* 音频播放器 */
+        audio { width: 100%; margin-top: 20px; outline: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎙️ 语音备忘录</h1>
+    
+    <div>
+        <button id="startBtn" class="btn btn-record">开始录音</button>
+        <button id="stopBtn" class="btn btn-stop">停止录音</button>
+    </div>
+
+    <div id="status" class="status">等待操作...</div>
+
+    <div id="playerContainer" style="display:none;">
+        <p>录制完成：</p>
+        <audio id="audioPlayback" controls></audio>
+        <br>
+        <a id="downloadLink" class="btn btn-download">下载音频</a>
+    </div>
+</div>
+
+<script>
+    // 变量声明
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusDiv = document.getElementById('status');
+    const playerContainer = document.getElementById('playerContainer');
+    const audioPlayback = document.getElementById('audioPlayback');
+    const downloadLink = document.getElementById('downloadLink');
+
+    // 检查浏览器支持
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusDiv.innerHTML = '<span style="color:red">当前浏览器不支持录音 API</span>';
+        startBtn.disabled = true;
+    }
+
+    // 开始录音
+    startBtn.onclick = async () => {
+        try {
+            statusDiv.innerHTML = '正在请求麦克风权限...';
+            
+            // 核心API：获取麦克风权限
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            statusDiv.innerHTML = '<span class="recording-indicator">● 正在录音...</span>';
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            playerContainer.style.display = 'none';
+
+            // 创建录音器
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                // 录音停止后的处理
+                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                audioPlayback.src = audioUrl;
+                downloadLink.href = audioUrl;
+                downloadLink.download = '录音_' + new Date().toISOString().slice(0, 10) + '.wav';
+                
+                statusDiv.textContent = '录音已完成';
+                playerContainer.style.display = 'block';
+                startBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'none';
+
+                // 停止所有音轨以释放麦克风占用（关闭麦克风灯）
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+        } catch (err) {
+            console.error('录音错误:', err);
+            statusDiv.innerHTML = `<span style="color:red">错误: ${err.message}</span>`;
+            if (err.name === 'NotAllowedError') {
+                statusDiv.innerHTML = '<span style="color:red">错误：请在浏览器地址栏允许麦克风权限</span>';
+            }
+        }
+    };
+
+    // 停止录音
+    stopBtn.onclick = () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+        }
+    };
+</script>
+
+</body>
+</html>
